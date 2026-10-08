@@ -240,3 +240,44 @@ In addition to the committed files reviewed above, three comprehensive technical
 - [ ] Simulator performance under sustained load (stress testing)
 - [ ] SSE stream backpressure handling design
 - [ ] Error recovery strategy for cache misses
+
+---
+
+# Code Review - Changes Since Last Commit
+
+**Review Date:** 2026-10-08
+**Last Commit:** ae49f4a - Add market data design docs and plan review
+**Branch:** start
+
+## Summary
+
+Two untracked files; no tracked file is modified. No code changed.
+
+## Files
+
+### 1. `planning/MARKET_DATA_REVIEW.md` (new, untracked)
+- **Change Type:** New documentation
+- **Details:** Code review of the market data backend, with test results and a prioritised defect list.
+- **Points to note:**
+  - The code it reviews is **not on this branch**. `start` has no `backend/` directory; the review covers `origin/main` @ `5b39f1e`, exported to a temporary directory. The document states this in its "Scope caveat" section.
+  - Test results recorded: 73 passed on Python 3.14 and 3.12, `ruff` clean, 91% coverage (`stream.py` 33%).
+  - Headline finding: `massive_client.py:103` reads `snap.last_trade.timestamp`, which does not exist in `massive` 2.2.0, so the Massive source would never write a price with a real key. Reproduced against the library's real model classes.
+  - Line references in the document point at files on `main`, so they cannot be followed from a `start` checkout.
+  - Findings that depend on live Massive behaviour (free-tier 403) were not verified with a real key; the document says so in its "Not verified" section.
+- **Status:** OK to commit as documentation. It leaves two decisions open: which design is the target (`main` code versus the `start` design docs), and whether the SSE wire format gains `prev_close` / `day_change_percent`.
+
+### 2. `.claude/settings.local.json` (untracked, predates this session)
+- **Change Type:** Local Claude Code sandbox settings
+- **Details:** Enables the sandbox and auto-allows sandboxed Bash commands.
+- **Status:** Machine-local by convention. Should not be committed; consider adding it to `.gitignore`.
+
+## Key Findings
+
+- No functional code changes, so nothing to test on this branch.
+- `start` and `origin/main` have diverged (1 commit ahead, 23 behind). The backend, its tests and a different set of planning docs exist only on `main`.
+
+## Recommendations
+
+1. Commit `planning/MARKET_DATA_REVIEW.md`.
+2. Keep `.claude/settings.local.json` out of the repository.
+3. Resolve the branch divergence before implementation work continues, so that the reviewed code and the design docs are in the same tree.
